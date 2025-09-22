@@ -1,0 +1,63 @@
+knid: Deployment
+apiVersion: apps/v1
+metadata: 
+  name: app2
+# Deployment lables
+  labels:
+    purpose: ingress  
+spec: 
+  selector:
+    matchLables:
+      purpose: ingress
+
+# pod definition
+
+template:
+  metadata:
+    name: app2
+    labels:
+      purpose: ingress
+
+  spec: 
+    containers:
+    - name: app2
+      image: vasanth135/appl:v1.0
+---
+apiVersion: v1
+kind: Service
+metadata:  
+  name: app2
+spec:
+  selector:
+    matchLables: 
+      purpose: ingress
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/tags: Environment=dev,Team=test
+    alb.ingress.kubernetes.io/group.name: vasanth135
+spec:
+  ingressClassName: alb
+  rules:
+  - host: "app2.vasanthreddy.space"   #"ALB rule"
+    httP:
+      paths:
+      - pathType: prefix
+        path: "/"
+        backend:
+          service:
+            name: app2        # "TG group"
+            port: 
+              number: 80
+      
+
